@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NightBite Cart</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Cart & checkout</h1>
+      <button class="secondary" onclick="logout()">Logout</button>
+    </header>
+    <div id="menuList" class="grid"></div>
+    <div class="card">
+      <h3>Place order</h3>
+      <label>Vendor id<input id="vendorId" type="number" required></label>
+      <label>Slot time<input id="slotTime" type="datetime-local" required></label>
+      <label>Items JSON<textarea id="items" rows="4" placeholder='[{"menuItemId":1,"quantity":2}]'></textarea></label>
+      <button id="placeOrderBtn">Place order</button>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const vendorId = urlParams.get('vendorId');
+    document.getElementById('vendorId').value = vendorId || '';
+
+    async function loadMenu() {
+      if (!vendorId) return;
+      try {
+        const menu = await apiFetch(`/api/vendors/${vendorId}/menu`);
+        document.getElementById('menuList').innerHTML = menu.map(item => `
+          <div class="vendor-card">
+            <h3>${item.name}</h3>
+            <p class="muted">${item.category} · ${item.veg ? 'Veg' : 'Non-veg'}</p>
+            <p>₹${item.price}</p>
+            <button onclick="addSampleItem(${item.id})">Add</button>
+          </div>
+        `).join('');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    function addSampleItem(menuItemId) {
+      const itemsField = document.getElementById('items');
+      const currentValue = itemsField.value.trim();
+      const next = currentValue ? JSON.parse(currentValue) : [];
+      next.push({ menuItemId, quantity: 1 });
+      itemsField.value = JSON.stringify(next);
+    }
+
+    document.getElementById('placeOrderBtn').addEventListener('click', async () => {
+      const payload = {
+        vendorId: Number(document.getElementById('vendorId').value),
+        slotTime: document.getElementById('slotTime').value.replace('T', ' ') + ':00',
+        items: JSON.parse(document.getElementById('items').value || '[]')
+      };
+      try {
+        const result = await apiFetch('/api/orders', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        alert('Order placed successfully');
+        window.location.href = '/order-history.html';
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    loadMenu();
+  </script>
+</body>
+</html>

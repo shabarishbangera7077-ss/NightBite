@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NightBite Orders</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Order history</h1>
+      <button class="secondary" onclick="logout()">Logout</button>
+    </header>
+    <div id="orders"></div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    async function loadOrders() {
+      try {
+        const orders = await apiFetch('/api/orders/my');
+        const container = document.getElementById('orders');
+        container.innerHTML = orders.map(order => `
+          <div class="card">
+            <h3>Order #${order.id}</h3>
+            <p class="muted">Status: ${order.status}</p>
+            <p>Items total: ₹${order.itemsTotal}</p>
+            <p>Delivery fee: ₹${order.deliveryFee}</p>
+            <p>Grand total: ₹${order.grandTotal}</p>
+          </div>
+        `).join('');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    loadOrders();
+  </script>
+</body>
+</html>

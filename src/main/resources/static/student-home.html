@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NightBite Student Home</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Open vendors</h1>
+      <button class="secondary" onclick="logout()">Logout</button>
+    </header>
+    <div id="vendorList" class="grid"></div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    async function loadVendors() {
+      try {
+        const vendors = await apiFetch('/api/vendors?openNow=true');
+        const list = document.getElementById('vendorList');
+        if (!vendors.length) {
+          list.innerHTML = '<div class="card">No open vendors right now.</div>';
+          return;
+        }
+
+        list.innerHTML = vendors.map(vendor => `
+          <div class="vendor-card">
+            <h3>${vendor.shopName}</h3>
+            <p class="muted">Open ${vendor.openTime} - ${vendor.closeTime}</p>
+            <p>Base fee: ₹${vendor.baseDeliveryFee}</p>
+            <a href="/cart.html?vendorId=${vendor.id}"><button>View menu</button></a>
+          </div>
+        `).join('');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    loadVendors();
+  </script>
+</body>
+</html>

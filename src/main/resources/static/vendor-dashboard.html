@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NightBite Vendor Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Vendor dashboard</h1>
+      <button class="secondary" onclick="logout()">Logout</button>
+    </header>
+
+    <div class="card">
+      <h3>Register shop</h3>
+      <form id="vendorForm">
+        <label>Shop Name<input type="text" id="shopName" required></label>
+        <label>Open Time<input type="time" id="openTime" value="18:00" required></label>
+        <label>Close Time<input type="time" id="closeTime" value="23:59" required></label>
+        <button type="submit">Register</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Menu manager</h3>
+      <form id="menuForm">
+        <label>Name<input type="text" id="menuName" required></label>
+        <label>Category<input type="text" id="menuCategory" required></label>
+        <label>Price<input type="number" id="menuPrice" min="1" step="0.5" required></label>
+        <label>Veg<select id="veg"><option value="true">Veg</option><option value="false">Non-veg</option></select></label>
+        <button type="submit">Add item</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    document.getElementById('vendorForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const payload = {
+        shopName: document.getElementById('shopName').value,
+        openTime: document.getElementById('openTime').value,
+        closeTime: document.getElementById('closeTime').value
+      };
+      try {
+        const result = await apiFetch('/api/vendors/register', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        alert('Vendor registered successfully');
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    document.getElementById('menuForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const payload = {
+        name: document.getElementById('menuName').value,
+        category: document.getElementById('menuCategory').value,
+        price: Number(document.getElementById('menuPrice').value),
+        veg: document.getElementById('veg').value === 'true',
+        available: true,
+        imageUrl: ''
+      };
+      try {
+        const vendorId = localStorage.getItem('vendorId') || '1';
+        await apiFetch(`/api/vendors/${vendorId}/menu`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        alert('Menu item added');
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  </script>
+</body>
+</html>

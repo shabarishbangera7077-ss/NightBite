@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NightBite Admin</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Admin dashboard</h1>
+      <button class="secondary" onclick="logout()">Logout</button>
+    </header>
+    <div id="dashboard" class="card"></div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    async function loadDashboard() {
+      try {
+        const data = await apiFetch('/api/admin/dashboard');
+        document.getElementById('dashboard').innerHTML = `
+          <h3>Stats</h3>
+          <p>Total orders: ${data.totalOrders}</p>
+          <p>Average batch size: ${data.averageBatchSize}</p>
+          <p>Total fees saved: ₹${data.totalDeliveryFeesSaved}</p>
+          <p>Top items: ${data.topItems.join(', ') || 'N/A'}</p>
+          <p>Busiest hours: ${data.busiestHours.join(', ') || 'N/A'}</p>
+        `;
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
